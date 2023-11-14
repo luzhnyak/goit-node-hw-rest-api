@@ -1,34 +1,5 @@
-const Contact = require("../models/contact");
+const { Contact } = require("../models/contact");
 const { HttpError, ctrlWrapper } = require("../helpers");
-
-const Joi = require("joi");
-
-const addShema = Joi.object({
-  name: Joi.string()
-    .min(3)
-    .max(30)
-    .required()
-    .messages({ "any.required": "missing required name field" }),
-  email: Joi.string()
-    .email()
-    .required()
-    .messages({ "any.required": "missing required email field" }),
-  phone: Joi.string()
-    .min(5)
-    .max(15)
-    .required()
-    .messages({ "any.required": "missing required phone field" }),
-  favorite: Joi.boolean(),
-});
-
-const updateShema = Joi.object({
-  name: Joi.string().min(3).max(30),
-  email: Joi.string().email(),
-  phone: Joi.string().min(5).max(15),
-  favorite: Joi.boolean(),
-})
-  .min(1)
-  .messages({ "object.min": "missing fields" });
 
 // ============================== Get All
 
@@ -53,11 +24,6 @@ const getContactById = async (req, res) => {
 // ============================== Add
 
 const addContact = async (req, res) => {
-  const { error } = addShema.validate(req.body);
-  if (error) {
-    throw HttpError(400, error.message);
-  }
-
   const result = await Contact.create(req.body);
 
   res.status(201).json(result);
@@ -68,7 +34,7 @@ const addContact = async (req, res) => {
 const removeContact = async (req, res) => {
   const { contactId } = req.params;
   console.log(Contact);
-  const result = await Contact.findByIdAndRemove({ _id: contactId });
+  const result = await Contact.findByIdAndDelete({ _id: contactId });
 
   if (!result) {
     throw HttpError(404, "Not found");
@@ -80,11 +46,6 @@ const removeContact = async (req, res) => {
 // ============================== Update
 
 const updateContact = async (req, res) => {
-  const { error } = updateShema.validate(req.body);
-  if (error) {
-    throw HttpError(400, error.message);
-  }
-
   const { contactId } = req.params;
   const result = await Contact.findByIdAndUpdate({ _id: contactId }, req.body, {
     new: true,
@@ -100,11 +61,6 @@ const updateContact = async (req, res) => {
 // ============================== Update status
 
 const updateStatusContact = async (req, res) => {
-  const { error } = updateShema.validate(req.body);
-  if (error) {
-    throw HttpError(400, error.message);
-  }
-
   const { contactId } = req.params;
   const result = await Contact.findByIdAndUpdate({ _id: contactId }, req.body, {
     new: true,
