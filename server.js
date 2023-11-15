@@ -1,14 +1,14 @@
 const app = require("./app");
 const mongoose = require("mongoose");
 
-const DB_HOST =
-  "mongodb+srv://luzhnyak:d4pwBIC7Q70BxyGa@luzhnyak.lhqrfpl.mongodb.net/hw-api?retryWrites=true&w=majority";
+const { DB_HOST } = process.env;
 
 mongoose
   .connect(DB_HOST)
   .then(() => {
-    app.listen(3000);
+    console.log(DB_HOST);
     console.log("Database connection successful");
+    app.listen(3000);
   })
   .catch((error) => {
     console.log(error.message);

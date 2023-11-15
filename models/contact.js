@@ -33,7 +33,9 @@ const updateSchema = Joi.object({
   .messages({ "object.min": "missing fields" });
 
 const updateStatusSchema = Joi.object({
-  favorite: Joi.boolean().required(),
+  favorite: Joi.boolean()
+    .required()
+    .messages({ "any.required": "missing field favorite" }),
 });
 
 // ========================== Mongoose schemas
