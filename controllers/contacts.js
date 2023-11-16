@@ -1,28 +1,18 @@
-const contacts = require("../models/contacts");
+const { Contact } = require("../models/contact");
 const { HttpError, ctrlWrapper } = require("../helpers");
 
-const Joi = require("joi");
-
-const addShema = Joi.object({
-  name: Joi.string().min(3).max(30).required(),
-  email: Joi.string().email().required(),
-  phone: Joi.string().min(5).max(15).required(),
-});
-
-const updateShema = Joi.object({
-  name: Joi.string().min(3).max(30),
-  email: Joi.string().email(),
-  phone: Joi.string().min(5).max(15),
-}).min(1);
+// ============================== Get All
 
 const listContacts = async (req, res) => {
-  const result = await contacts.listContacts();
+  const result = await Contact.find();
   res.json(result);
 };
 
+// ============================== Get by ID
+
 const getContactById = async (req, res) => {
   const { contactId } = req.params;
-  const result = await contacts.getContactById(contactId);
+  const result = await Contact.findOne({ _id: contactId });
 
   if (!result) {
     throw HttpError(404, "Not found");
@@ -31,21 +21,20 @@ const getContactById = async (req, res) => {
   res.json(result);
 };
 
-const addContact = async (req, res) => {
-  const { error } = addShema.validate(req.body);
-  if (error) {
-    const fieldName = error.details[0].path[0];
-    throw HttpError(400, `missing required ${fieldName} field`);
-  }
+// ============================== Add
 
-  const result = await contacts.addContact(req.body);
+const addContact = async (req, res) => {
+  const result = await Contact.create(req.body);
 
   res.status(201).json(result);
 };
 
+// ============================== Delete
+
 const removeContact = async (req, res) => {
   const { contactId } = req.params;
-  const result = await contacts.removeContact(contactId);
+  console.log(Contact);
+  const result = await Contact.findByIdAndDelete({ _id: contactId });
 
   if (!result) {
     throw HttpError(404, "Not found");
@@ -54,15 +43,28 @@ const removeContact = async (req, res) => {
   res.json({ message: "contact deleted" });
 };
 
+// ============================== Update
+
 const updateContact = async (req, res) => {
-  const { error } = updateShema.validate(req.body);
-  if (error) {
-    console.log(error);
-    throw HttpError(400, `missing fields`);
+  const { contactId } = req.params;
+  const result = await Contact.findByIdAndUpdate({ _id: contactId }, req.body, {
+    new: true,
+  });
+
+  if (!result) {
+    throw HttpError(404, "Not found");
   }
 
+  res.json(result);
+};
+
+// ============================== Update status
+
+const updateStatusContact = async (req, res) => {
   const { contactId } = req.params;
-  const result = await contacts.updateContact(contactId, req.body);
+  const result = await Contact.findByIdAndUpdate({ _id: contactId }, req.body, {
+    new: true,
+  });
 
   if (!result) {
     throw HttpError(404, "Not found");
@@ -77,4 +79,5 @@ module.exports = {
   addContact: ctrlWrapper(addContact),
   removeContact: ctrlWrapper(removeContact),
   updateContact: ctrlWrapper(updateContact),
+  updateStatusContact: ctrlWrapper(updateStatusContact),
 };
