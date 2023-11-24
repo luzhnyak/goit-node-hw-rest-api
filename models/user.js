@@ -22,7 +22,11 @@ const userSchema = new Schema(
     },
     subscription: {
       type: String,
-      required: true,
+      enum: ["starter", "pro", "business"],
+      default: "starter",
+    },
+    token: {
+      type: String,
     },
   },
   { versionKey: false, timestamps: true }

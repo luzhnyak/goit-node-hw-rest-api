@@ -32,14 +32,9 @@ const jwt = require("jsonwebtoken");
 
 // ============================== Get current User
 const getCurrentUser = async (req, res) => {
-  const userId = 1;
-  const result = await User.findOne({ _id: userId });
+  const { email } = req.user;
 
-  if (!result) {
-    throw HttpError(404, "Not found");
-  }
-
-  res.json(result);
+  res.json({ email });
 };
 
 // ============================== Register
@@ -71,7 +66,7 @@ const loginUser = async (req, res) => {
     throw HttpError(401, "Email or password invalid");
   }
 
-  const passwordCompare = bcrypt.compare(password, user.password);
+  const passwordCompare = await bcrypt.compare(password, user.password);
 
   if (!passwordCompare) {
     throw HttpError(401, "Email or password invalid");
@@ -84,6 +79,8 @@ const loginUser = async (req, res) => {
   };
 
   const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "23h" });
+
+  await User.findByIdAndUpdate(user._id, { token });
 
   res.json({ token });
 };
@@ -106,14 +103,12 @@ const updateSubscription = async (req, res) => {
 // ============================== Logout User
 
 const logoutUser = async (req, res) => {
-  const userId = 1;
-  const result = await User.findOne({ _id: userId });
+  const { _id } = req.user;
+  await User.findByIdAndUpdate(_id, { token: "" });
 
-  if (!result) {
-    throw HttpError(404, "Not found");
-  }
-
-  res.json(result);
+  res.json({
+    Message: "Logout success",
+  });
 };
 
 module.exports = {
