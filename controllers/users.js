@@ -1,30 +1,3 @@
-// Registration request
-// POST /users/register
-// Content-Type: application/json
-// RequestBody: {
-//   "email": "example@example.com",
-//   "password": "examplepassword"
-// }
-// Registration validation error
-// Status: 400 Bad Request
-// Content-Type: application/json
-// ResponseBody: <Помилка від Joi або іншої бібліотеки валідації>
-// Registration conflict error
-// Status: 409 Conflict
-// Content-Type: application/json
-// ResponseBody: {
-//   "message": "Email in use"
-// }
-// Registration success response
-// Status: 201 Created
-// Content-Type: application/json
-// ResponseBody: {
-//   "user": {
-//     "email": "example@example.com",
-//     "subscription": "starter"
-//   }
-// }
-
 const { User } = require("../models/user");
 const { HttpError, ctrlWrapper } = require("../helpers");
 const bcrypt = require("bcrypt");
@@ -32,9 +5,11 @@ const jwt = require("jsonwebtoken");
 
 // ============================== Get current User
 const getCurrentUser = async (req, res) => {
-  const { email } = req.user;
+  const { _id } = req.user;
 
-  res.json({ email });
+  const { email, subscription } = await User.findOne({ _id });
+
+  res.json({ email, subscription });
 };
 
 // ============================== Register
@@ -44,16 +19,16 @@ const registerUser = async (req, res) => {
   const user = await User.findOne({ email });
 
   if (user) {
-    throw HttpError(409, "Email already in use");
+    throw HttpError(409, "Email in use");
   }
 
   const hashPassword = await bcrypt.hash(password, 10);
 
   const newUser = await User.create({ ...req.body, password: hashPassword });
 
-  res
-    .status(201)
-    .json({ email: newUser.email, subscription: newUser.subscription });
+  res.status(201).json({
+    user: { email: newUser.email, subscription: newUser.subscription },
+  });
 };
 
 // ============================== Login
@@ -63,13 +38,13 @@ const loginUser = async (req, res) => {
   const user = await User.findOne({ email });
 
   if (!user) {
-    throw HttpError(401, "Email or password invalid");
+    throw HttpError(401, "Email or password is wrong");
   }
 
   const passwordCompare = await bcrypt.compare(password, user.password);
 
   if (!passwordCompare) {
-    throw HttpError(401, "Email or password invalid");
+    throw HttpError(401, "Email or password is wrong");
   }
 
   const { SECRET_KEY } = process.env;
@@ -82,22 +57,21 @@ const loginUser = async (req, res) => {
 
   await User.findByIdAndUpdate(user._id, { token });
 
-  res.json({ token });
+  res.json({
+    token,
+    user: { email: user.email, subscription: user.subscription },
+  });
 };
 
-// ============================== Update status
+// ============================== Update subscription
 
 const updateSubscription = async (req, res) => {
-  const { contactId } = req.params;
-  const result = await User.findByIdAndUpdate({ _id: contactId }, req.body, {
+  const { _id } = req.user;
+  const user = await User.findByIdAndUpdate({ _id }, req.body, {
     new: true,
   });
 
-  if (!result) {
-    throw HttpError(404, "Not found");
-  }
-
-  res.json(result);
+  res.json(user);
 };
 
 // ============================== Logout User
@@ -106,9 +80,7 @@ const logoutUser = async (req, res) => {
   const { _id } = req.user;
   await User.findByIdAndUpdate(_id, { token: "" });
 
-  res.json({
-    Message: "Logout success",
-  });
+  res.status(204).json();
 };
 
 module.exports = {

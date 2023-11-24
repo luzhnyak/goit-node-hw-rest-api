@@ -38,27 +38,19 @@ const User = mongoose.model("user", userSchema);
 
 // ========================== Joi schemas
 
-const registerSchema = Joi.object({
+const userJoiSchema = Joi.object({
   password: Joi.string()
     .min(6)
     .required()
     .messages({ "any.required": "Set password for user" }),
-  email: Joi.string()
-    .pattern(emailRegexp)
-    .required()
-    .messages({ "any.required": "Email is required" }),
-  subscription: Joi.string().required(),
+  email: Joi.string().pattern(emailRegexp).required().messages({
+    "any.required": "Email is required",
+    "string.pattern.base": "Email {:[.]} is not valid",
+  }),
 });
 
-const loginSchema = Joi.object({
-  password: Joi.string()
-    .min(6)
-    .required()
-    .messages({ "any.required": "Set password for user" }),
-  email: Joi.string()
-    .pattern(emailRegexp)
-    .required()
-    .messages({ "any.required": "Email is required" }),
+const userSubscriptionSchema = Joi.object({
+  subscription: Joi.string().valid("starter", "pro", "business"),
 });
 
-module.exports = { User, loginSchema, registerSchema };
+module.exports = { User, userJoiSchema, userSubscriptionSchema };
