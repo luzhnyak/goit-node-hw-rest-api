@@ -1,6 +1,10 @@
 const express = require("express");
 const { validateBody, aunthenticate } = require("../../middlewares");
-const { userJoiSchema, userSubscriptionSchema } = require("../../models/user");
+const {
+  userJoiSchema,
+  userSubscriptionSchema,
+  userAvatarSchema,
+} = require("../../models/user");
 
 const router = express.Router();
 
@@ -18,7 +22,14 @@ router.patch(
   "/",
   aunthenticate,
   validateBody(userSubscriptionSchema),
-  ctrl.updateSubscription
+  ctrl.updateUser
+);
+
+router.patch(
+  "/avatars",
+  aunthenticate,
+  validateBody(userAvatarSchema),
+  ctrl.updateUser
 );
 
 module.exports = router;
