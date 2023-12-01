@@ -3,6 +3,10 @@ const { HttpError, ctrlWrapper } = require("../helpers");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const gravatar = require("gravatar");
+const path = require("path");
+const fs = require("fs/promises");
+
+const avatarDir = path.join(__dirname, "../", "public", "avatars");
 
 // ============================== Get current User
 const getCurrentUser = async (req, res) => {
@@ -68,13 +72,33 @@ const loginUser = async (req, res) => {
   });
 };
 
-// ============================== Update user
+// ============================== Update subscription
 
-const updateUser = async (req, res) => {
+const updateSubscription = async (req, res) => {
   const { _id } = req.user;
   const user = await User.findByIdAndUpdate({ _id }, req.body, {
     new: true,
   });
+
+  res.json(user);
+};
+
+// ============================== Update avatar
+
+const updateAvatar = async (req, res) => {
+  const { _id } = req.user;
+  const { path: tempUpload, originalname } = req.file;
+  const resultUpload = path.join(avatarDir, originalname);
+  await fs.rename(tempUpload, resultUpload);
+  const avatarURL = path.join("avatars", originalname);
+
+  const user = await User.findByIdAndUpdate(
+    { _id },
+    { avatarURL },
+    {
+      new: true,
+    }
+  );
 
   res.json(user);
 };
@@ -93,5 +117,6 @@ module.exports = {
   registerUser: ctrlWrapper(registerUser),
   loginUser: ctrlWrapper(loginUser),
   logoutUser: ctrlWrapper(logoutUser),
-  updateUser: ctrlWrapper(updateUser),
+  updateSubscription: ctrlWrapper(updateSubscription),
+  updateAvatar: ctrlWrapper(updateAvatar),
 };

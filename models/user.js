@@ -57,13 +57,8 @@ const userSubscriptionSchema = Joi.object({
   subscription: Joi.string().valid("starter", "pro", "business"),
 });
 
-const userAvatarSchema = Joi.object({
-  avatar: Joi.string().required(),
-});
-
 module.exports = {
   User,
   userJoiSchema,
   userSubscriptionSchema,
-  userAvatarSchema,
 };
