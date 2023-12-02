@@ -67,7 +67,7 @@ const loginUser = async (req, res) => {
 
   await User.findByIdAndUpdate(user._id, { token });
 
-  res.json({
+  res.status(200).json({
     token,
     user: { email: user.email, subscription: user.subscription },
   });
@@ -93,8 +93,8 @@ const updateAvatar = async (req, res) => {
 
   const image = await Jimp.read(tempUpload);
   image
-    .resize(250, 250) // resize
-    .quality(60) // set JPEG quality
+    .autocrop()
+    .cover(250, 250, Jimp.HORIZONTAL_ALIGN_CENTER || Jimp.VERTICAL_ALIGN_MIDDLE) // resize
     .write(tempUpload); // save
 
   await fs.rename(tempUpload, resultUpload);
