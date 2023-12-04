@@ -5,7 +5,7 @@ const { loginUser } = require("./users");
 
 const { DB_HOST } = process.env;
 
-const req = { body: { email: "oleg@gmail.com", password: "oleg010682" } };
+const req = { body: { email: "oleg@gmail.com", password: "11111111" } };
 const res = {
   status: jest.fn().mockReturnThis(),
   json: jest.fn(),
@@ -20,7 +20,7 @@ describe("############## Test loginUser controller", () => {
     await mongoose.disconnect();
   });
 
-  test("Login status 200...", async () => {
+  test("Check status 200", async () => {
     await loginUser(req, res);
     expect(res.status).toHaveBeenCalledWith(200);
   });
