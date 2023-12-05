@@ -1,25 +1,24 @@
 const multer = require("multer");
-const { HttpError } = require("../helpers");
 const path = require("path");
+const { HttpError } = require("../helpers");
 
 const tenpDir = path.join(__dirname, "../", "tmp");
 
 const multerConfig = multer.diskStorage({
   destination: tenpDir,
-  filename: (reg, file, cb) => {
+  filename: (req, file, cb) => {
     cb(null, file.originalname);
   },
 });
 
 const upload = multer({
   storage: multerConfig,
-  limits: { fileSize: 2000000 },
+  limits: { fileSize: 2 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
-    if (file.mimetype.includes("image")) {
-      cb(null, true);
-      return;
+    if (!file.mimetype.includes("image")) {
+      cb(HttpError(400, "This file type is not supported"));
     }
-    cb(new Error("The file type is not supported", 401));
+    cb(null, true);
   },
 });
 
