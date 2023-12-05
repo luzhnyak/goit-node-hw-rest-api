@@ -8,7 +8,6 @@ const aunthenticate = async (req, res, next) => {
   const { authorization = "" } = req.headers;
   const [bearer, token] = authorization.split(" ");
 
-  console.log(bearer);
   if (bearer !== "Bearer") {
     next(HttpError(401));
   }
