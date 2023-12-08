@@ -68,7 +68,7 @@ const userSubscriptionSchema = Joi.object({
 
 const userEmailSchema = Joi.object({
   email: Joi.string().pattern(emailRegexp).required().messages({
-    "any.required": "Email is required",
+    "any.required": "Missing required field email",
     "string.pattern.base": "Email {:[.]} is not valid",
   }),
 });
